@@ -1,9 +1,7 @@
 <template>
-  <div class="mx-auto max-w-5xl px-2 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-8 space-y-6">
-    <header class="space-y-1">
-      <p class="text-xs uppercase tracking-wide text-slate-500">記録</p>
+    <header class="py-3 space-y-1">
+      <p class="text-xs tracking-wide uppercase text-slate-500">記録</p>
       <h2 class="text-lg font-semibold text-slate-900 sm:text-xl">管理記録の作成</h2>
-      <p class="text-xs sm:text-sm text-slate-600">植物・管理方法・肥料を選択して保存してください。</p>
     </header>
 
     <form
@@ -15,7 +13,7 @@
         <select
           v-model="form.plant_id"
           required
-          class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         >
           <option value="">選択してください</option>
           <option v-for="plant in plants" :key="plant.id" :value="plant.id">
@@ -29,7 +27,7 @@
         <input
           type="date"
           v-model="form.record_date"
-          class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
         />
       </div>
 
@@ -39,7 +37,7 @@
           <label
             v-for="cm in careMethods"
             :key="cm.id"
-            class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm"
+            class="flex items-center gap-2 px-3 py-2 text-xs border rounded-lg border-slate-200 sm:text-sm"
           >
             <input type="checkbox" :value="cm.id" v-model="form.care_method_ids" />
             <span>{{ cm.name }}</span>
@@ -57,7 +55,7 @@
           <label
             v-for="f in fertilizers"
             :key="f.id"
-            class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm"
+            class="flex items-center gap-2 px-3 py-2 text-xs border rounded-lg border-slate-200 sm:text-sm"
           >
             <input type="checkbox" :value="f.id" v-model="form.fertilizer_ids" />
             <span>{{ f.name }}</span>
@@ -69,7 +67,7 @@
         <label class="text-sm font-medium text-slate-700">メモ</label>
         <textarea
           v-model="form.memo"
-          class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+          class="w-full px-3 py-2 text-sm border rounded-lg border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
           rows="3"
           placeholder="特記事項を記入してください"
         />
@@ -78,7 +76,7 @@
       <button
             type="submit"
             :disabled="saving"
-        class="w-full rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-600"
+        class="w-full px-4 py-2 text-sm font-semibold text-white rounded-lg shadow bg-emerald-500 hover:bg-emerald-600"
       >
             {{ saving ? "保存中..." : (isEditing ? '更新' : '記録を保存') }}
       </button>
@@ -87,7 +85,7 @@
             v-if="isEditing"
             type="button"
             @click.prevent="cancelEditEmit"
-            class="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+            class="w-full px-4 py-2 text-sm font-semibold bg-white border rounded-lg border-slate-200 text-slate-700"
           >
             キャンセル
           </button>
@@ -95,7 +93,6 @@
       <p v-if="errorMessage" class="text-sm text-red-500">{{ errorMessage }}</p>
       <p v-if="successMessage" class="text-sm text-emerald-600">{{ successMessage }}</p>
     </form>
-  </div>
 </template>
 
 <script setup lang="ts">

@@ -1,15 +1,17 @@
 <template>
-  <div class="mx-auto max-w-5xl px-2 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-8 space-y-6">
-    <header class="space-y-1">
-      <p class="text-xs uppercase tracking-wide text-slate-500">登録</p>
+    <header class="py-3 space-y-1">
+      <p class="text-xs tracking-wide uppercase text-slate-500">{{ fertilizers.length }}件</p>
       <h1 class="text-lg font-semibold text-slate-900 sm:text-xl">肥料登録</h1>
-      <p class="text-xs sm:text-sm text-slate-600">肥料名と備考を入力してください。</p>
     </header>
 
-    <form
-      @submit.prevent="editingId ? updateFertilizer() : createFertilizer()"
-      class="p-3 space-y-3 bg-white shadow-sm rounded-2xl ring-1 ring-slate-200 sm:p-4 md:p-5"
-    >
+    <!-- モバイルは全体、lg以上は2列レイアウト -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <!-- フォーム領域 -->
+      <div class="space-y-6">
+        <form
+          @submit.prevent="editingId ? updateFertilizer() : createFertilizer()"
+          class="space-y-3 bg-white shadow-sm rounded-2xl ring-1 ring-slate-200 sm:p-4 md:p-5"
+        >
       <div class="space-y-1">
         <label class="text-sm font-medium text-slate-700">肥料名 *</label>
         <input
@@ -44,39 +46,60 @@
         キャンセル
       </button>
       <p v-if="errorMessage" class="text-sm text-red-500">{{ errorMessage }}</p>
-    </form>
-
-    <section class="space-y-3">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-semibold text-slate-900 sm:text-lg">登録済みの肥料</h2>
-        <span class="text-xs text-slate-500">{{ fertilizers.length }}件</span>
+        </form>
       </div>
-      <ul class="space-y-2 sm:space-y-3 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
-        <li
-          v-for="fert in fertilizers"
-          :key="fert.id"
-          class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-4"
-        >
-          <div class="font-semibold text-slate-900 text-sm sm:text-base">{{ fert.name }}</div>
-          <p v-if="fert.memo" class="mt-2 text-xs sm:text-sm text-slate-700">{{ fert.memo }}</p>
-          <div class="mt-3 flex gap-2">
-            <button
-              @click="startEdit(fert)"
-              class="rounded-md border px-2 py-1 text-xs sm:text-sm text-emerald-600 hover:bg-emerald-50"
-            >
-              編集
-            </button>
-            <button
-              @click="deleteFertilizer(fert.id)"
-              class="rounded-md border px-2 py-1 text-xs sm:text-sm text-red-600 hover:bg-red-50"
-            >
-              削除
-            </button>
-          </div>
-        </li>
-      </ul>
-    </section>
-  </div>
+
+      <!-- リスト領域 -->
+      <section class="space-y-3">
+        <div class="overflow-x-auto shadow-sm rounded-2xl ring-1 ring-slate-200">
+          <table class="w-full bg-white">
+            <thead class="bg-slate-50 border-b border-slate-200">
+              <tr>
+                <th
+                  @click="handleSort('name')"
+                  class="px-4 py-3 text-left text-xs font-semibold text-slate-700 cursor-pointer hover:bg-slate-100 select-none"
+                >
+                  肥料名{{ getSortIndicator('name') }}
+                </th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-700">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(fert, index) in fertilizers"
+                :key="fert.id"
+                class="border-b border-slate-200 hover:bg-slate-50 transition-colors"
+                :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
+              >
+                <td class="px-4 py-3 text-sm font-medium text-slate-900">{{ fert.name }}</td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex justify-center gap-3">
+                    <button
+                      @click="startEdit(fert)"
+                      class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-md transition-colors"
+                      title="編集"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                      </svg>
+                    </button>
+                    <button
+                      @click="deleteFertilizer(fert.id)"
+                      class="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      title="削除"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -100,15 +123,34 @@ const newFertilizer = ref({
   memo: "",
 });
 
+// ソート状態
+const sortBy = ref<"name" | "created_at">("created_at");
+const sortOrder = ref<"asc" | "desc">("desc");
+
 const fetchFertilizers = async () => {
   const { data, error } = await supabase
     .from("fertilizers")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order(sortBy.value, { ascending: sortOrder.value === "asc" });
 
   if (!error && data) {
     fertilizers.value = data as Fertilizer[];
   }
+};
+
+const handleSort = (column: "name" | "created_at") => {
+  if (sortBy.value === column) {
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+  } else {
+    sortBy.value = column;
+    sortOrder.value = "asc";
+  }
+  fetchFertilizers();
+};
+
+const getSortIndicator = (column: "name" | "created_at") => {
+  if (sortBy.value !== column) return "";
+  return sortOrder.value === "asc" ? " ▲" : " ▼";
 };
 
 const createFertilizer = async () => {
