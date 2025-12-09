@@ -1,14 +1,14 @@
 <template>
-  <div class="mx-auto max-w-2xl px-2 sm:px-4 py-6 space-y-6">
+  <div class="mx-auto max-w-5xl px-2 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-8 space-y-6">
     <header class="space-y-1">
       <p class="text-xs uppercase tracking-wide text-slate-500">記録</p>
-      <h2 class="text-xl font-semibold text-slate-900">管理記録の作成</h2>
-      <p class="text-sm text-slate-600">植物・管理方法・肥料を選択して保存してください。</p>
+      <h2 class="text-lg font-semibold text-slate-900 sm:text-xl">管理記録の作成</h2>
+      <p class="text-xs sm:text-sm text-slate-600">植物・管理方法・肥料を選択して保存してください。</p>
     </header>
 
     <form
       @submit.prevent="saveRecord"
-      class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 p-4 space-y-4"
+      class="p-3 space-y-4 bg-white shadow-sm rounded-2xl ring-1 ring-slate-200 sm:p-4 md:p-5"
     >
       <div class="space-y-1">
         <label class="text-sm font-medium text-slate-700">植物 *</label>
@@ -35,11 +35,11 @@
 
       <div class="space-y-2">
         <label class="text-sm font-medium text-slate-700">管理方法（複数選択可）</label>
-        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <label
             v-for="cm in careMethods"
             :key="cm.id"
-            class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm"
           >
             <input type="checkbox" :value="cm.id" v-model="form.care_method_ids" />
             <span>{{ cm.name }}</span>
@@ -53,11 +53,11 @@
           肥料を使う
         </label>
 
-        <div v-if="form.use_fertilizer" class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div v-if="form.use_fertilizer" class="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           <label
             v-for="f in fertilizers"
             :key="f.id"
-            class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm"
+            class="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm"
           >
             <input type="checkbox" :value="f.id" v-model="form.fertilizer_ids" />
             <span>{{ f.name }}</span>
@@ -76,12 +76,21 @@
       </div>
 
       <button
-        type="submit"
-        :disabled="saving"
+            type="submit"
+            :disabled="saving"
         class="w-full rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-600"
       >
-        {{ saving ? "保存中..." : "記録を保存" }}
+            {{ saving ? "保存中..." : (isEditing ? '更新' : '記録を保存') }}
       </button>
+
+          <button
+            v-if="isEditing"
+            type="button"
+            @click.prevent="cancelEditEmit"
+            class="w-full rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+          >
+            キャンセル
+          </button>
 
       <p v-if="errorMessage" class="text-sm text-red-500">{{ errorMessage }}</p>
       <p v-if="successMessage" class="text-sm text-emerald-600">{{ successMessage }}</p>
@@ -90,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { supabase } from "@/lib/supabaseClient";
 
 type Plant = { id: number; name: string };
@@ -107,6 +116,9 @@ const successMessage = ref("");
 
 const today = new Date().toISOString().slice(0, 10);
 
+const props = defineProps<{ editingRecord?: any | null }>();
+const emits = defineEmits(["saved", "cancel-edit"] as const);
+
 const form = ref({
   plant_id: "" as string | number,
   record_date: today,
@@ -115,6 +127,27 @@ const form = ref({
   use_fertilizer: false,
   fertilizer_ids: [] as number[],
 });
+
+const isEditing = ref(false);
+
+// If parent passes editingRecord, populate form
+watch(
+  () => props.editingRecord,
+  (rec) => {
+    if (rec && rec.id) {
+      isEditing.value = true;
+      form.value.plant_id = rec.plant?.id ?? "";
+      form.value.record_date = rec.record_date || today;
+      form.value.memo = rec.memo || "";
+      form.value.care_method_ids = (rec.careMethods || []).map((c: any) => c.id);
+      form.value.fertilizer_ids = (rec.fertilizers || []).map((f: any) => f.id);
+      form.value.use_fertilizer = form.value.fertilizer_ids.length > 0;
+    } else {
+      isEditing.value = false;
+    }
+  },
+  { immediate: true }
+);
 
 // 초기 데이터 로드
 const loadMasterData = async () => {
@@ -153,6 +186,10 @@ onMounted(() => {
   loadMasterData();
 });
 
+const cancelEditEmit = () => {
+  emits("cancel-edit");
+};
+
 // 기록 저장
 const saveRecord = async () => {
   errorMessage.value = "";
@@ -172,6 +209,81 @@ const saveRecord = async () => {
   }
 
   try {
+    if (isEditing.value && props.editingRecord && props.editingRecord.id) {
+      // 更新処理
+      const recordId = props.editingRecord.id;
+
+      const { error: updErr } = await supabase
+        .from("records")
+        .update({
+          plant_id: Number(form.value.plant_id),
+          record_date: form.value.record_date || today,
+          memo: form.value.memo || null,
+        })
+        .eq("id", recordId);
+
+      if (updErr) {
+        console.error(updErr);
+        errorMessage.value = "記録の更新中にエラーが発生しました。(records)";
+        saving.value = false;
+        return;
+      }
+
+      // record_care_methods: 기존 것 삭제 후 재삽입
+      const { error: delCMErr } = await supabase.from("record_care_methods").delete().eq("record_id", recordId);
+      if (delCMErr) {
+        console.error(delCMErr);
+        errorMessage.value = "管理方法の更新中にエラーが発生しました。";
+        saving.value = false;
+        return;
+      }
+
+      const careRows = form.value.care_method_ids.map((cmId) => ({ record_id: recordId, care_method_id: cmId }));
+      if (careRows.length > 0) {
+        const { error: insCMErr } = await supabase.from("record_care_methods").insert(careRows);
+        if (insCMErr) {
+          console.error(insCMErr);
+          errorMessage.value = "管理方法の更新中にエラーが発生しました。";
+          saving.value = false;
+          return;
+        }
+      }
+
+      // record_fertilizers: 기존 것 삭제 후 재삽입
+      const { error: delFErr } = await supabase.from("record_fertilizers").delete().eq("record_id", recordId);
+      if (delFErr) {
+        console.error(delFErr);
+        errorMessage.value = "肥料の更新中にエラーが発生しました。";
+        saving.value = false;
+        return;
+      }
+
+      if (form.value.use_fertilizer && form.value.fertilizer_ids.length > 0) {
+        const fertRows = form.value.fertilizer_ids.map((fId) => ({ record_id: recordId, fertilizer_id: fId }));
+        const { error: insFErr } = await supabase.from("record_fertilizers").insert(fertRows);
+        if (insFErr) {
+          console.error(insFErr);
+          errorMessage.value = "肥料の更新中にエラーが発生しました。";
+          saving.value = false;
+          return;
+        }
+      }
+
+      successMessage.value = "記録を更新しました。";
+      emits("saved", { id: recordId, action: "update" });
+
+      // reset editing
+      isEditing.value = false;
+      // clear form
+      form.value.record_date = today;
+      form.value.memo = "";
+      form.value.care_method_ids = [];
+      form.value.use_fertilizer = false;
+      form.value.fertilizer_ids = [];
+      saving.value = false;
+      return;
+    }
+
     // 1) records에 메인 기록 저장
     const { data: recordData, error: recordError } = await supabase
       .from("records")
@@ -227,6 +339,7 @@ const saveRecord = async () => {
     }
 
     successMessage.value = "記録を保存しました。";
+    emits("saved", { id: recordId, action: "create" });
     // 폼 초기화
     form.value.record_date = today;
     form.value.memo = "";

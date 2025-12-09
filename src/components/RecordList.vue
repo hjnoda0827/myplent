@@ -1,24 +1,24 @@
 <template>
-  <div class="mx-auto max-w-3xl px-2 sm:px-4 py-6 space-y-6">
-    <header class="space-y-1">
-      <div class="flex items-center justify-between gap-3">
+  <div class="mx-auto max-w-6xl px-2 py-4 sm:px-4 sm:py-6 md:px-6 lg:px-8 space-y-6">
+    <header class="space-y-2 sm:space-y-3">
+      <div class="flex items-center justify-between gap-2 sm:gap-3">
         <div>
           <p class="text-xs uppercase tracking-wide text-slate-500">記録</p>
-          <h1 class="text-xl font-semibold text-slate-900">管理記録の閲覧</h1>
-          <p class="text-sm text-slate-600">
+          <h1 class="text-lg font-semibold text-slate-900 sm:text-xl">管理記録の閲覧</h1>
+          <p class="text-xs sm:text-sm text-slate-600">
             植物/日付で絞り込み、リストまたはカレンダーで確認できます。
           </p>
         </div>
         <div class="hidden sm:flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
           <button
-            class="rounded-md px-3 py-1 text-sm font-medium"
+            class="rounded-md px-3 py-1 text-xs sm:text-sm font-medium"
             :class="viewMode === 'list' ? 'bg-emerald-500 text-white' : 'text-slate-700'"
             @click="viewMode = 'list'"
           >
             リスト
           </button>
           <button
-            class="rounded-md px-3 py-1 text-sm font-medium"
+            class="rounded-md px-3 py-1 text-xs sm:text-sm font-medium"
             :class="viewMode === 'calendar' ? 'bg-emerald-500 text-white' : 'text-slate-700'"
             @click="viewMode = 'calendar'"
           >
@@ -28,7 +28,7 @@
       </div>
       <div class="sm:hidden grid grid-cols-2 gap-2">
         <button
-          class="rounded-lg border px-3 py-2 text-sm font-medium shadow-sm"
+          class="rounded-lg border px-3 py-2 text-xs font-medium shadow-sm"
           :class="
             viewMode === 'list'
               ? 'border-emerald-500 bg-white text-emerald-700'
@@ -39,7 +39,7 @@
           リスト
         </button>
         <button
-          class="rounded-lg border px-3 py-2 text-sm font-medium shadow-sm"
+          class="rounded-lg border px-3 py-2 text-xs font-medium shadow-sm"
           :class="
             viewMode === 'calendar'
               ? 'border-emerald-500 bg-white text-emerald-700'
@@ -52,35 +52,35 @@
       </div>
     </header>
 
-    <div class="flex flex-col gap-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+    <div class="flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-4">
       <div class="flex flex-col gap-2 sm:flex-row sm:items-end">
         <div class="flex flex-1 flex-col gap-1">
-          <label class="text-sm font-medium text-slate-700">植物</label>
+          <label class="text-xs sm:text-sm font-medium text-slate-700">植物</label>
           <select
             v-model="filters.plantId"
-            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
           >
             <option value="">すべて</option>
             <option v-for="p in plants" :key="p.id" :value="p.id">{{ p.name }}</option>
           </select>
         </div>
         <div class="flex w-full sm:w-48 flex-col gap-1">
-          <label class="text-sm font-medium text-slate-700">日付</label>
+          <label class="text-xs sm:text-sm font-medium text-slate-700">日付</label>
           <input
             type="date"
             v-model="filters.date"
-            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs sm:text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
           />
         </div>
         <button
           @click="fetchRecords"
           :disabled="loading"
-          class="w-full sm:w-28 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-600"
+          class="w-full sm:w-28 rounded-lg bg-emerald-500 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow hover:bg-emerald-600"
         >
           {{ loading ? "読み込み中..." : "検索" }}
         </button>
       </div>
-      <p v-if="errorMessage" class="text-sm text-red-500">{{ errorMessage }}</p>
+      <p v-if="errorMessage" class="text-xs sm:text-sm text-red-500">{{ errorMessage }}</p>
     </div>
 
     <div
@@ -98,23 +98,39 @@
 
     <template v-else>
       <!-- 목록 모드 -->
-      <ul v-if="viewMode === 'list'" class="space-y-3">
+      <ul v-if="viewMode === 'list'" class="space-y-2 sm:space-y-3 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
         <li
           v-for="rec in records"
           :key="rec.id"
-          class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200"
+          class="rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-200 sm:p-4"
         >
-          <div class="flex items-center justify-between gap-2 text-sm">
-            <strong class="text-slate-900">{{ rec.plant?.name ?? "不明" }}</strong>
-            <span class="text-xs text-slate-500">{{ rec.record_date }}</span>
+          <div class="flex items-start justify-between gap-2 text-xs sm:text-sm">
+            <div class="flex-1">
+              <strong class="text-slate-900 block">{{ rec.plant?.name ?? "不明" }}</strong>
+              <span class="text-slate-500 block">{{ rec.record_date }}</span>
+            </div>
           </div>
-          <div v-if="rec.careMethods?.length" class="mt-1 text-sm text-slate-700">
+          <div v-if="rec.careMethods?.length" class="mt-2 text-xs sm:text-sm text-slate-700">
             管理方法: {{ rec.careMethods.map((c) => c.name).join(", ") }}
           </div>
-          <div v-if="rec.fertilizers?.length" class="text-sm text-slate-700">
+          <div v-if="rec.fertilizers?.length" class="text-xs sm:text-sm text-slate-700">
             肥料: {{ rec.fertilizers.map((f) => f.name).join(", ") }}
           </div>
-          <div v-if="rec.memo" class="mt-2 text-sm text-slate-800">{{ rec.memo }}</div>
+          <div v-if="rec.memo" class="mt-2 text-xs sm:text-sm text-slate-800">{{ rec.memo }}</div>
+          <div class="mt-3 flex gap-2">
+            <button
+              @click="$emit('edit-record', rec)"
+              class="rounded-md border px-2 py-1 text-xs sm:text-sm text-emerald-600 hover:bg-emerald-50"
+            >
+              編集
+            </button>
+            <button
+              @click="deleteRecord(rec.id)"
+              class="rounded-md border px-2 py-1 text-xs sm:text-sm text-red-600 hover:bg-red-50"
+            >
+              削除
+            </button>
+          </div>
         </li>
       </ul>
 
@@ -227,20 +243,34 @@
             <li
               v-for="rec in selectedDateRecords"
               :key="rec.id"
-              class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm"
+              class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm"
             >
               <div class="flex items-center justify-between text-xs text-slate-600">
                 <span class="font-semibold text-slate-800">{{ rec.plant?.name ?? "不明" }}</span>
                 <span>{{ rec.record_date }}</span>
               </div>
-              <div v-if="rec.careMethods?.length" class="mt-1 text-[13px] text-slate-700">
+              <div v-if="rec.careMethods?.length" class="mt-1 text-xs sm:text-sm text-slate-700">
                 {{ rec.careMethods.map((c) => c.name).join(", ") }}
               </div>
-              <div v-if="rec.fertilizers?.length" class="text-[13px] text-slate-700">
+              <div v-if="rec.fertilizers?.length" class="text-xs sm:text-sm text-slate-700">
                 肥料: {{ rec.fertilizers.map((f) => f.name).join(", ") }}
               </div>
-              <div v-if="rec.memo" class="mt-1 text-[13px] text-slate-800">
+              <div v-if="rec.memo" class="mt-1 text-xs sm:text-sm text-slate-800">
                 {{ rec.memo }}
+              </div>
+              <div class="mt-2 flex gap-2">
+                <button
+                  @click="$emit('edit-record', rec)"
+                  class="rounded-md border px-2 py-1 text-xs sm:text-sm text-emerald-600 hover:bg-emerald-50"
+                >
+                  編集
+                </button>
+                <button
+                  @click="deleteRecord(rec.id)"
+                  class="rounded-md border px-2 py-1 text-xs sm:text-sm text-red-600 hover:bg-red-50"
+                >
+                  削除
+                </button>
               </div>
             </li>
           </ul>
@@ -251,7 +281,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { supabase } from "@/lib/supabaseClient";
 
 type Plant = { id: number; name: string };
@@ -272,6 +302,16 @@ const plants = ref<Plant[]>([]);
 const loading = ref(false);
 const errorMessage = ref("");
 const viewMode = ref<"list" | "calendar">("list");
+
+const props = defineProps<{ refreshKey?: number }>();
+
+// refresh when parent increments refreshKey
+watch(
+  () => props.refreshKey,
+  (v) => {
+    if (v !== undefined) fetchRecords();
+  }
+);
 
 const filters = ref({
   plantId: "" as string | number,
@@ -428,5 +468,26 @@ const goToday = () => {
   const now = new Date();
   currentMonth.value = new Date(now.getFullYear(), now.getMonth(), 1);
   selectedDate.value = todayStr;
+};
+
+const deleteRecord = async (id: number) => {
+  if (!confirm("この記録を削除しますか？")) return;
+
+  // 削除順: 関連テーブル -> records
+  try {
+    const { error: err1 } = await supabase.from("record_care_methods").delete().eq("record_id", id);
+    if (err1) throw err1;
+    const { error: err2 } = await supabase.from("record_fertilizers").delete().eq("record_id", id);
+    if (err2) throw err2;
+    const { error: err3 } = await supabase.from("records").delete().eq("id", id);
+    if (err3) throw err3;
+
+    // remove from local records
+    const idx = records.value.findIndex((r) => r.id === id);
+    if (idx !== -1) records.value.splice(idx, 1);
+  } catch (e) {
+    console.error(e);
+    errorMessage.value = "記録の削除に失敗しました。";
+  }
 };
 </script>
